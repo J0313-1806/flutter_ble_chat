@@ -1,6 +1,11 @@
-import 'package:hive/hive.dart';
+import 'dart:convert';
 
+import 'package:hive/hive.dart';
 part 'message.g.dart';
+
+Message messageFromJson(String str) => Message.fromJson(json.decode(str));
+
+String messageToJson(Message data) => json.encode(data.toJson());
 
 @HiveType(typeId: 1)
 class Message extends HiveObject {
@@ -33,4 +38,29 @@ class Message extends HiveObject {
       required this.fromUsername,
       required this.message,
       required this.dateTime});
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      sent: json['name'],
+      toId: json['toId'],
+      toUsername: json['toUsername'],
+      fromId: json['fromId'],
+      fromUsername: json['fromUsername'],
+      message: json['message'],
+      dateTime: json['dateTime'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'sent': sent,
+      'toId': toId,
+      'toUsername': toUsername,
+      'fromId': fromId,
+      'fromUsername': fromUsername,
+      'message': message,
+      'dateTime': dateTime,
+    };
+  }
 }

@@ -215,6 +215,8 @@ class HomeController extends GetxController {
         onConnectionResult: (id, status) {
           connectingLoader.value = false;
           MessagesController messagesController = Get.find();
+          // messagesController.gettingChat(info.endpointName);
+
           // advertiseFuncInitiated(false);
           if (status == Status.CONNECTED) {
             messagesController.onConnect(id);
@@ -262,7 +264,6 @@ class HomeController extends GetxController {
           messagesController.gettingChat(info.endpointName);
 
           /// We are about to use this info once we add the device to the device list
-          browserInfo = info;
           requesteeId(id);
 
           /// show the bottom modal widget
@@ -294,7 +295,6 @@ class HomeController extends GetxController {
   /// Disconnect from another device
   void disconnectDevice({required String id}) async {
     try {
-      // messagesController.onDisconnect(id);
       log("diconnecting deviceID: $id");
       await nearby.disconnectFromEndpoint(id);
       devices.update(id, (value) {
@@ -315,7 +315,6 @@ class HomeController extends GetxController {
   /// Reject request to connect to another device
   void rejectConnection({required String id}) async {
     try {
-      // messagesController.onDisconnect(id);
       await nearby.rejectConnection(id);
     } catch (e) {
       log('there is an error in rejection:: $e');
@@ -374,11 +373,6 @@ class HomeController extends GetxController {
       if (connectedDevices.containsKey(toId)) {
         await nearby.sendBytesPayload(
             toId, Uint8List.fromList(utf8.encode(message)));
-        //     .then((value) {
-        //   log("then got executed");
-        // }).catchError((onError) {
-        //   log('there is an error sending message to another device:: $onError');
-        // });
         Future.delayed(
             const Duration(seconds: 0),
             () => messagesController.onSendMessage(

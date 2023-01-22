@@ -1,3 +1,4 @@
+import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/controller/devices_controller.dart';
 import 'package:b_le/source/controller/messages_controller.dart';
 import 'package:b_le/source/database/local.dart';
@@ -7,6 +8,6 @@ class AppBindings extends Bindings {
   @override
   void dependencies() {
     Get.put(LocalX());
-    // Get.put(HomeController());
+    Get.put(AuthController());
   }
 }

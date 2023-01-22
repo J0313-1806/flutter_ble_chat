@@ -38,8 +38,13 @@ class _ChatState extends State<Chat> {
   }
 
   void _scrollToBottom() {
-    _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+    MessagesController messagesController = Get.find();
+    messagesController.messages.isNotEmpty
+        ? _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut)
+        : null;
   }
 
   @override
@@ -56,10 +61,10 @@ class _ChatState extends State<Chat> {
             IconButton(
               onPressed: () {
                 MessagesController messagesController = Get.find();
-                messagesController.gettingChat(widget.deviceUsername);
+                messagesController.backupToCloud();
               },
               icon: const Icon(
-                Icons.history,
+                Icons.cloud,
                 color: Colors.blue,
               ),
             ),
@@ -79,19 +84,26 @@ class _ChatState extends State<Chat> {
 
                   List<Message> messages = controller.messages;
 
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messages.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      // controller.savingChat(
-                      //     widget.deviceUsername, index, messages[index]);
-                      controller.messageIndex = index;
-                      return ChatBubble(
-                          message: messages[index],
-                          deviceUsername: widget.deviceUsername,
-                          appUser: widget.appUser);
-                    },
-                  );
+                  return messages.isNotEmpty
+                      ? ListView.builder(
+                          controller: _scrollController,
+                          itemCount: messages.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            // controller.savingChat(
+                            //     widget.deviceUsername, index, messages[index]);
+                            controller.messageIndex = index;
+                            return ChatBubble(
+                                message: messages[index],
+                                deviceUsername: widget.deviceUsername,
+                                appUser: widget.appUser);
+                          },
+                        )
+                      : const Center(
+                          child: Text(
+                            "Connect to start chatting or see chat history",
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                        );
                 },
               ),
             ),

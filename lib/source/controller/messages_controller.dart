@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/message.dart';
 import 'package:get/get.dart';
@@ -102,15 +103,24 @@ class MessagesController extends GetxController {
     update();
   }
 
+  /// Saving the messages in local storage
   void savingChat(String deviceName, int msgIndex, Message messages) {
     LocalX.storeChat(deviceName, msgIndex, messages);
   }
 
+  /// Getting the messages from local storage
   void gettingChat(String deviceName) async {
     List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
 
     messages.addAll(msg);
 
-    log("chats ${msg.first.message}");
+    log("chats ${messages.last}");
+  }
+
+  void backupToCloud() {
+    AuthController authController = Get.find();
+    // var backupMessages = messageToJson(messages);
+    // log("backupMessages: $backupMessages");
+    authController.backingUpToCloud();
   }
 }

@@ -1,10 +1,13 @@
-import 'package:b_le/source/controller/home_controller.dart';
+import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/view/screens/device_page.dart';
+import 'package:b_le/source/view/widgets/loging_form.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
+
+  static final AuthController _authController = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +20,15 @@ class Home extends StatelessWidget {
             children: [
               Align(
                 alignment: Alignment.center,
-                child: SizedBox(
-                  width: Get.width / 1.5,
-                  child: TextFormField(
-                    controller: TextEditingController(),
-                    decoration: const InputDecoration(
-                      label: Text("Enter username"),
-                    ),
-                  ),
-                ),
+                child: _authController.currentUser != null
+                    ? const Text(
+                        "Logged In!",
+                        style: TextStyle(color: Colors.blue),
+                      )
+                    : const LoginForm(),
+              ),
+              const SizedBox(
+                height: 20,
               ),
               Align(
                 alignment: Alignment.center,

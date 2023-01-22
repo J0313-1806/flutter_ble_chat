@@ -1,12 +1,19 @@
 import 'package:b_le/source/bindings/app_binding.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/view/screens/home.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-void main() {
+void main() async {
+  // needed to ensure initializing of different modeules necessary for app to function
   WidgetsFlutterBinding.ensureInitialized();
+
+  // initialize hive for local storage
   initHive();
+
+  // initializes firebase app for using its api's
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
