@@ -3,6 +3,7 @@ import 'dart:developer';
 // import 'dart:typed_data';
 
 import 'package:b_le/source/controller/messages_controller.dart';
+import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/device.dart';
 import 'package:b_le/source/view/widgets/show_bottom_modal.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -28,6 +29,9 @@ class HomeController extends GetxController {
 
   /// List of connected devices
   var connectedDevices = <String, Device>{}.obs;
+
+  /// Name of the connected device
+  var connectedDeviceName = "".obs;
 
   /// The one who is requesting the info of a device
   var requestorId = '0'.obs;
@@ -67,6 +71,7 @@ class HomeController extends GetxController {
   /// Discover nearby devices
   void searchNearbyDevices() async {
     try {
+      MessagesController messagesController = Get.put(MessagesController());
       if (await nearby.checkLocationEnabled() &&
           await nearby.checkBluetoothPermission()) {
         await nearby.startDiscovery(
@@ -74,6 +79,10 @@ class HomeController extends GetxController {
           strategy,
           onEndpointFound: (id, name, serviceId) {
             log("id: $id\nname: $name\nserviceID: $serviceId");
+
+            LocalX.openChatBox(name);
+
+            // messagesController.gettingChat(name);
 
             /// Once an endpoint is found, add it
             /// to the end of the devices observable
@@ -254,18 +263,19 @@ class HomeController extends GetxController {
   /// Accept request to connect to another device
   void acceptConnection({required String id}) async {
     try {
-      MessagesController messagesController = Get.put(MessagesController());
+      MessagesController messagesController = Get.find();
       log("accepting deviceID: $id");
       // messagesController.onConnect(id);
       await nearby.acceptConnection(
         id,
         onPayLoadRecieved: (endId, payload) {
           log("connected: \npayload: $payload\nendID: $endId");
-
+          advertiserInfo;
+          browserInfo;
           Future.delayed(const Duration(milliseconds: 0), () {
             messagesController.onReceiveMessage(
               fromId: endId,
-              fromInfo: advertiserInfo!,
+              fromInfo: advertiserInfo ?? browserInfo!,
               payload: payload,
             );
           });

@@ -1,5 +1,6 @@
 import 'package:b_le/source/controller/devices_controller.dart';
 import 'package:b_le/source/controller/messages_controller.dart';
+import 'package:b_le/source/model/message.dart';
 import 'package:b_le/source/view/widgets/chat_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,6 +52,18 @@ class _ChatState extends State<Chat> {
             style: const TextStyle(color: Colors.blue),
             overflow: TextOverflow.ellipsis,
           ),
+          actions: <Widget>[
+            IconButton(
+              onPressed: () {
+                MessagesController messagesController = Get.find();
+                messagesController.gettingChat(widget.deviceUsername);
+              },
+              icon: const Icon(
+                Icons.history,
+                color: Colors.blue,
+              ),
+            ),
+          ],
           centerTitle: true,
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -64,11 +77,16 @@ class _ChatState extends State<Chat> {
                   // WidgetsBinding.instance
                   //     .addPostFrameCallback((_) => _scrollToBottom());
 
-                  var messages = controller.messages;
+                  List<Message> messages = controller.messages;
+                  // messages.isNotEmpty
+                  //     : null;
+
                   return ListView.builder(
                     controller: _scrollController,
                     itemCount: messages.length,
                     itemBuilder: (BuildContext context, int index) {
+                      controller.savingChat(
+                          widget.deviceUsername, index, messages[index]);
                       return ChatBubble(
                           message: messages[index],
                           deviceUsername: widget.deviceUsername,

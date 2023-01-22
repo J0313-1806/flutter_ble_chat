@@ -17,7 +17,7 @@ class ShowBottomModal extends StatelessWidget {
   Widget build(BuildContext context) {
     // String cId, String id, ConnectionInfo info
     return Container(
-      color: Colors.deepPurple,
+      color: Colors.white70,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

@@ -1,6 +1,9 @@
 # b_le
 
-A new Flutter project.
+A Flutter Project for peer-peer chat application using Bluetooth Low energy.
+
+The Application needs bluetooth connectivity and location permission and both turned on for finding nearby phones and connection to it.
+For using cloud storage a username and password is necessary, that will be used to find the chat history to the previously connected devices.
 
 ## Getting Started
 

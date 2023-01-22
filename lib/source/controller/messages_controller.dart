@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/message.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';
@@ -9,12 +11,6 @@ class MessagesController extends GetxController {
   var messages = <Message>[].obs;
   var username = ''.obs;
   var connectedIdList = <String>[].obs;
-
-  @override
-  void onClose() {
-    // messages.clear();
-    super.onClose();
-  }
 
   /// return true if the device id is included in the list of connected devices
   bool isDeviceConnected(String id) =>
@@ -75,5 +71,14 @@ class MessagesController extends GetxController {
 
     /// This will force a widget rebuild
     update();
+  }
+
+  void savingChat(String deviceName, int msgIndex, Message messages) {
+    LocalX.storeChat(deviceName, msgIndex, messages);
+  }
+
+  void gettingChat(String deviceName) async {
+    List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
+    log("chats ${msg.first.message}");
   }
 }
