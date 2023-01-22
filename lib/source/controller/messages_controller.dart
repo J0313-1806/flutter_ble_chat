@@ -23,6 +23,9 @@ class MessagesController extends GetxController {
   void onDisconnect(String id) =>
       connectedIdList.removeWhere((element) => element == id);
 
+  /// getting the index of message in list to store in local
+  var messageIndex = -1.obs;
+
   void onSendMessage(
       {required String toId,
       required String toUsername,
@@ -39,6 +42,19 @@ class MessagesController extends GetxController {
       message: message,
       dateTime: DateTime.now(),
     ));
+
+    savingChat(
+        toUsername,
+        messageIndex,
+        Message(
+          sent: true,
+          toId: toId,
+          fromId: "",
+          toUsername: toUsername,
+          fromUsername: fromUsername,
+          message: message,
+          dateTime: DateTime.now(),
+        ));
 
     /// This will force a widget rebuild
     update();
@@ -67,6 +83,19 @@ class MessagesController extends GetxController {
           dateTime: DateTime.now(),
         ),
       );
+      savingChat(
+        fromInfo.endpointName,
+        messageIndex,
+        Message(
+          toId: "",
+          sent: false,
+          fromId: fromId,
+          fromUsername: fromInfo.endpointName,
+          toUsername: username.value,
+          message: messageString,
+          dateTime: DateTime.now(),
+        ),
+      );
     }
 
     /// This will force a widget rebuild
@@ -79,6 +108,9 @@ class MessagesController extends GetxController {
 
   void gettingChat(String deviceName) async {
     List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
+
+    messages.addAll(msg);
+
     log("chats ${msg.first.message}");
   }
 }

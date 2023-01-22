@@ -78,15 +78,14 @@ class _ChatState extends State<Chat> {
                   //     .addPostFrameCallback((_) => _scrollToBottom());
 
                   List<Message> messages = controller.messages;
-                  // messages.isNotEmpty
-                  //     : null;
 
                   return ListView.builder(
                     controller: _scrollController,
                     itemCount: messages.length,
                     itemBuilder: (BuildContext context, int index) {
-                      controller.savingChat(
-                          widget.deviceUsername, index, messages[index]);
+                      // controller.savingChat(
+                      //     widget.deviceUsername, index, messages[index]);
+                      controller.messageIndex = index;
                       return ChatBubble(
                           message: messages[index],
                           deviceUsername: widget.deviceUsername,

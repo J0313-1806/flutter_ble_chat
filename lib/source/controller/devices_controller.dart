@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:b_le/source/controller/messages_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/device.dart';
+import 'package:b_le/source/model/message.dart';
 import 'package:b_le/source/view/widgets/show_bottom_modal.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -112,6 +113,7 @@ class HomeController extends GetxController {
   /// Advertise own device to other devices nearby
   void advertiseDevice() async {
     try {
+      MessagesController messagesController = Get.put(MessagesController());
       await nearby.startAdvertising(
         username.value,
         strategy,
@@ -129,8 +131,7 @@ class HomeController extends GetxController {
                   serviceId: "com.example.b_le",
                   isConnected: false));
 
-          /// We are about to use this info once we add the device to the device list
-          advertiserInfo = info;
+          messagesController.gettingChat(info.endpointName);
           requestorId(idn);
 
           /// show the bottom modal widget
@@ -198,6 +199,7 @@ class HomeController extends GetxController {
 
     // overlay.show();
     try {
+      MessagesController messagesController = Get.find();
       await nearby.requestConnection(
         nickname,
         deviceId,
@@ -205,6 +207,8 @@ class HomeController extends GetxController {
           browserFuncInitiated(true);
           // overlay.hide();
           log("requestConnection\nndpointName: ${info.endpointName}\nauthToken: ${info.authenticationToken}\ndeviceID: $deviceId\nid: $id");
+
+          messagesController.gettingChat(info.endpointName);
 
           /// We are about to use this info once we add the device to the device list
           browserInfo = info;
@@ -240,12 +244,17 @@ class HomeController extends GetxController {
     try {
       // messagesController.onDisconnect(id);
       log("diconnecting deviceID: $id");
-      // await nearby.disconnectFromEndpoint(id);
+      await nearby.disconnectFromEndpoint(id);
       devices.update(id, (value) {
         value.isConnected = false;
         return value = value;
       });
     } catch (e) {
+      Get.defaultDialog(
+          title: "Could'nt disconnect",
+          middleText:
+              "Either already connected or the endpoint is invalid\nTry restarting the app if its the latter",
+          onConfirm: () => Get.back());
       log('there is an error disconnecting the device:: $e');
     }
   }
@@ -261,7 +270,8 @@ class HomeController extends GetxController {
   }
 
   /// Accept request to connect to another device
-  void acceptConnection({required String id}) async {
+  void acceptConnection(
+      {required String id, required ConnectionInfo info}) async {
     try {
       MessagesController messagesController = Get.find();
       log("accepting deviceID: $id");
@@ -270,12 +280,11 @@ class HomeController extends GetxController {
         id,
         onPayLoadRecieved: (endId, payload) {
           log("connected: \npayload: $payload\nendID: $endId");
-          advertiserInfo;
-          browserInfo;
+
           Future.delayed(const Duration(milliseconds: 0), () {
             messagesController.onReceiveMessage(
               fromId: endId,
-              fromInfo: advertiserInfo ?? browserInfo!,
+              fromInfo: info,
               payload: payload,
             );
           });
@@ -283,9 +292,14 @@ class HomeController extends GetxController {
       ).then((value) {
         if (value) {
           log("recieved message succesfully");
-          // Get.back();
+          Get.back();
         }
       }).catchError((onError) {
+        Get.back();
+        Get.defaultDialog(
+            title: "Couldn't accept",
+            middleText: "Try connecting again",
+            onConfirm: () => Get.back());
         log("accept connection: $onError");
         return;
       });
@@ -303,6 +317,7 @@ class HomeController extends GetxController {
       required String message}) async {
     try {
       MessagesController messagesController = Get.find();
+
       // if (connectedDevices.containsKey(toId)) {
       await nearby.sendBytesPayload(
           toId, Uint8List.fromList(utf8.encode(message)));
@@ -319,6 +334,7 @@ class HomeController extends GetxController {
               fromId: fromId,
               fromUsername: fromUsername,
               message: message));
+
       log("message send successfully");
       return true;
       // } else {
