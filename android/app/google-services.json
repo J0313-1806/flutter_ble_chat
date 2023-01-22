@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "212547948202",
+    "project_id": "ble-chat-891b2",
+    "storage_bucket": "ble-chat-891b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212547948202:android:6266455b883df8325c8ad3",
+        "android_client_info": {
+          "package_name": "com.example.b_le"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "212547948202-ffra7gupjejatb0ov3lpomie7v9n9iqg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.b_le",
+            "certificate_hash": "770f6da28a08d5b4d28305b459de32f616810c20"
+          }
+        },
+        {
+          "client_id": "212547948202-ihv04sbld8k9e8ljed2li2eubdit2ls9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDm6QglQrsVpGetauMPigAxKxU7DpYsEOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "212547948202-ihv04sbld8k9e8ljed2li2eubdit2ls9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

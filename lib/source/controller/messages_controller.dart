@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/message.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,9 @@ class MessagesController extends GetxController {
   void onDisconnect(String id) =>
       connectedIdList.removeWhere((element) => element == id);
 
+  /// getting the index of message in list to store in local
+  var messageIndex = -1.obs;
+
   void onSendMessage(
       {required String toId,
       required String toUsername,
@@ -39,6 +43,19 @@ class MessagesController extends GetxController {
       message: message,
       dateTime: DateTime.now(),
     ));
+
+    savingChat(
+        toUsername,
+        messageIndex,
+        Message(
+          sent: true,
+          toId: toId,
+          fromId: "",
+          toUsername: toUsername,
+          fromUsername: fromUsername,
+          message: message,
+          dateTime: DateTime.now(),
+        ));
 
     /// This will force a widget rebuild
     update();
@@ -67,18 +84,43 @@ class MessagesController extends GetxController {
           dateTime: DateTime.now(),
         ),
       );
+      savingChat(
+        fromInfo.endpointName,
+        messageIndex,
+        Message(
+          toId: "",
+          sent: false,
+          fromId: fromId,
+          fromUsername: fromInfo.endpointName,
+          toUsername: username.value,
+          message: messageString,
+          dateTime: DateTime.now(),
+        ),
+      );
     }
 
     /// This will force a widget rebuild
     update();
   }
 
+  /// Saving the messages in local storage
   void savingChat(String deviceName, int msgIndex, Message messages) {
     LocalX.storeChat(deviceName, msgIndex, messages);
   }
 
+  /// Getting the messages from local storage
   void gettingChat(String deviceName) async {
     List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
-    log("chats ${msg.first.message}");
+
+    messages.addAll(msg);
+
+    log("chats ${messages.last}");
+  }
+
+  void backupToCloud() {
+    AuthController authController = Get.find();
+    // var backupMessages = messageToJson(messages);
+    // log("backupMessages: $backupMessages");
+    authController.backingUpToCloud();
   }
 }

@@ -34,7 +34,8 @@ class ShowBottomModal extends StatelessWidget {
                 child: const Text("No"),
               ),
               ElevatedButton(
-                onPressed: () => _devicesController.acceptConnection(id: id),
+                onPressed: () =>
+                    _devicesController.acceptConnection(id: id, info: info),
                 child: const Text("Yes"),
               ),
             ],
