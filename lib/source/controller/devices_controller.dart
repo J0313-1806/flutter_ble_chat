@@ -5,7 +5,6 @@ import 'dart:developer';
 import 'package:b_le/source/controller/messages_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/device.dart';
-import 'package:b_le/source/model/message.dart';
 import 'package:b_le/source/view/widgets/show_bottom_modal.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -29,7 +28,7 @@ class HomeController extends GetxController {
   var devices = <String, Device>{}.obs;
 
   /// List of connected devices
-  var connectedDevices = <String, Device>{}.obs;
+  var connectedDevices = <String, bool>{}.obs;
 
   /// Name of the connected device
   var connectedDeviceName = "".obs;
@@ -45,17 +44,29 @@ class HomeController extends GetxController {
   /// Shows when request has been send
   var requestingLoader = false.obs;
 
-  /// When advertise Device function is initiated
-  RxBool advertiseFuncInitiated = RxBool(false);
+  /// Scanning nearby devices
+  var scanningDevices = false.obs;
 
-  /// When broswer fuction is initiated
-  RxBool browserFuncInitiated = RxBool(false);
+  /// To check if bluetooth permission has given
+  var isBluetoothPermissionGiven = false.obs;
+
+  /// To check if location is on
+  var isLocationOn = false.obs;
+
+  /// To check if location permission has given
+  var isLocationPermissionGiven = false.obs;
+
+  /// Connection Initiated loader
+  var connectingLoader = false.obs;
 
   @override
   void onReady() async {
     super.onReady();
     AndroidDeviceInfo androidDeviceInfo = await deviceInfo.androidInfo;
     username.value = androidDeviceInfo.model;
+    isBluetoothPermissionGiven.value = await nearby.checkBluetoothPermission();
+    isLocationPermissionGiven.value = await nearby.checkLocationPermission();
+    isLocationOn.value = await nearby.checkLocationEnabled();
     advertiseDevice();
     searchNearbyDevices();
   }
@@ -69,16 +80,71 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
+  /// To ask and check for bluetooth permission
+  void getBluetoothPermission() async {
+    nearby.askBluetoothPermission();
+
+    if (isBluetoothPermissionGiven.value) {
+      Get.defaultDialog(
+        title: "Bluetooth permission acquired!",
+        middleText: "Please turn on your bluetooth,\nif its off",
+        onConfirm: () async {
+          Get.back();
+        },
+      );
+    } else {
+      Get.defaultDialog(
+        title: "Bluetooth permission required!",
+        middleText: "Please give Bluetooth permission",
+        onConfirm: () {
+          nearby.askBluetoothPermission();
+
+          Get.back();
+          const GetSnackBar(
+            title: "Bluetooth is permission given",
+          );
+        },
+      );
+    }
+  }
+
+  /// To ask and check location permission
+  void getLocationPermission() async {
+    if (isLocationPermissionGiven.value) {
+      Get.defaultDialog(
+        title: "Location permission acquired!",
+        middleText: "Please turn on your location,\nif its off",
+        onConfirm: () async {
+          Get.back();
+        },
+      );
+    } else {
+      Get.defaultDialog(
+        title: "Location permission required!",
+        middleText: "Please give Location permission",
+        onConfirm: () async {
+          isLocationPermissionGiven.value =
+              await nearby.askLocationPermission();
+
+          Get.back();
+          const GetSnackBar(
+            title: "Location permission given",
+          );
+        },
+      );
+    }
+  }
+
   /// Discover nearby devices
   void searchNearbyDevices() async {
     try {
-      MessagesController messagesController = Get.put(MessagesController());
-      if (await nearby.checkLocationEnabled() &&
-          await nearby.checkBluetoothPermission()) {
+      if (isBluetoothPermissionGiven.value && isLocationPermissionGiven.value) {
+        scanningDevices.value = true;
         await nearby.startDiscovery(
           username.value,
           strategy,
           onEndpointFound: (id, name, serviceId) {
+            scanningDevices.value = false;
             log("id: $id\nname: $name\nserviceID: $serviceId");
 
             LocalX.openChatBox(name);
@@ -96,16 +162,18 @@ class HomeController extends GetxController {
                     isConnected: false));
           },
           onEndpointLost: (id) {
-            // messagesController.onDisconnect(id ?? "");
-            // devices.remove(id);
+            scanningDevices.value = false;
+            devices.remove(id);
             nearby.disconnectFromEndpoint(id ?? "");
           },
         );
       } else {
-        nearby.askBluetoothPermission();
-        await nearby.askLocationPermission();
+        scanningDevices.value = false;
+        getBluetoothPermission();
+        getLocationPermission();
       }
     } catch (e) {
+      scanningDevices.value = false;
       log('there is an error searching for nearby devices:: $e');
     }
   }
@@ -118,7 +186,7 @@ class HomeController extends GetxController {
         username.value,
         strategy,
         onConnectionInitiated: (idn, info) {
-          advertiseFuncInitiated(true);
+          connectingLoader.value = true;
 
           /// Remove first the device from the list in case it was already there
           /// This duplication could occur since we combine advertise and discover
@@ -145,47 +213,34 @@ class HomeController extends GetxController {
           );
         },
         onConnectionResult: (id, status) {
+          connectingLoader.value = false;
           MessagesController messagesController = Get.find();
-          advertiseFuncInitiated(false);
+          // advertiseFuncInitiated(false);
           if (status == Status.CONNECTED) {
             messagesController.onConnect(id);
 
-            connectedDevices.putIfAbsent(id, () => devices[id]!);
+            connectedDevices.putIfAbsent(id, () => true);
             log("connected: $connectedDevices");
 
             /// Add to device list
             devices.update(id, (value) {
               value.isConnected = true;
               return value;
-            }
-                // (value) => Device(
-                //     id: id,
-                //     name: advertiserInfo!.endpointName,
-                //     serviceId: "com.example.b_le",
-                //     isConnected: status == Status.CONNECTED ? true : false),
-                );
-            // } else if (status == Status.REJECTED) {
-            //   /// Add to device list
-            //   devices.add(Device(
-            //       id: id,
-            //       name: requestorDeviceInfo.endpointName,
-            //       serviceId: requestorDeviceInfo.endpointName,
-            //       isConnected: false));
-            // }
+            });
           }
         },
         onDisconnected: (endpointId) {
-          advertiseFuncInitiated(false);
-          // messagesController.onDisconnect(endpointId);
+          connectingLoader.value = false;
 
           /// Remove the device from the device list
-          devices.remove(endpointId);
+          connectedDevices.remove(endpointId);
         },
         // serviceId: "com.example.b_le",
       );
       log("devices: \n\t$devices");
     } catch (e) {
-      advertiseFuncInitiated(false);
+      connectingLoader.value = false;
+      // advertiseFuncInitiated(false);
       log('there is an error advertising the device:: $e');
     }
   }
@@ -195,17 +250,13 @@ class HomeController extends GetxController {
     required String nickname,
     required String deviceId,
   }) async {
-    // final overlay = LoadingOverlay.of(requestContext);
-
-    // overlay.show();
     try {
       MessagesController messagesController = Get.find();
+      connectingLoader.value = true;
       await nearby.requestConnection(
         nickname,
         deviceId,
         onConnectionInitiated: (id, info) {
-          browserFuncInitiated(true);
-          // overlay.hide();
           log("requestConnection\nndpointName: ${info.endpointName}\nauthToken: ${info.authenticationToken}\ndeviceID: $deviceId\nid: $id");
 
           messagesController.gettingChat(info.endpointName);
@@ -218,19 +269,20 @@ class HomeController extends GetxController {
           Get.bottomSheet(ShowBottomModal(cId: id, id: deviceId, info: info));
         },
         onConnectionResult: (endpointId, status) {
-          connectedDevices.putIfAbsent(deviceId, () => devices[deviceId]!);
+          connectingLoader.value = false;
+          connectedDevices.putIfAbsent(deviceId, () => true);
           log("connected: $connectedDevices");
-          browserFuncInitiated(false);
+          // browserFuncInitiated(false);
           log("$endpointId : $status");
         },
         onDisconnected: (value) {
-          browserFuncInitiated(false);
-          // messagesController.onDisconnect(deviceId);
+          connectingLoader.value = false;
+          connectedDevices.remove(deviceId);
           log("on disconnect: $value");
         },
       );
     } catch (e) {
-      browserFuncInitiated(false);
+      connectingLoader.value = false;
       log('there is an error requesting to connect to a device:: $e');
       if (e.toString() ==
           "PlatformException(Failure, 8003: STATUS_ALREADY_CONNECTED_TO_ENDPOINT, null, null)") {
@@ -249,9 +301,10 @@ class HomeController extends GetxController {
         value.isConnected = false;
         return value = value;
       });
+      connectedDevices.remove(id);
     } catch (e) {
       Get.defaultDialog(
-          title: "Could'nt disconnect",
+          title: "Could'nt disconnect roperly",
           middleText:
               "Either already connected or the endpoint is invalid\nTry restarting the app if its the latter",
           onConfirm: () => Get.back());
@@ -275,7 +328,7 @@ class HomeController extends GetxController {
     try {
       MessagesController messagesController = Get.find();
       log("accepting deviceID: $id");
-      // messagesController.onConnect(id);
+
       await nearby.acceptConnection(
         id,
         onPayLoadRecieved: (endId, payload) {
@@ -318,28 +371,28 @@ class HomeController extends GetxController {
     try {
       MessagesController messagesController = Get.find();
 
-      // if (connectedDevices.containsKey(toId)) {
-      await nearby.sendBytesPayload(
-          toId, Uint8List.fromList(utf8.encode(message)));
-      //     .then((value) {
-      //   log("then got executed");
-      // }).catchError((onError) {
-      //   log('there is an error sending message to another device:: $onError');
-      // });
-      Future.delayed(
-          const Duration(seconds: 0),
-          () => messagesController.onSendMessage(
-              toId: toId,
-              toUsername: toUsername,
-              fromId: fromId,
-              fromUsername: fromUsername,
-              message: message));
+      if (connectedDevices.containsKey(toId)) {
+        await nearby.sendBytesPayload(
+            toId, Uint8List.fromList(utf8.encode(message)));
+        //     .then((value) {
+        //   log("then got executed");
+        // }).catchError((onError) {
+        //   log('there is an error sending message to another device:: $onError');
+        // });
+        Future.delayed(
+            const Duration(seconds: 0),
+            () => messagesController.onSendMessage(
+                toId: toId,
+                toUsername: toUsername,
+                fromId: fromId,
+                fromUsername: fromUsername,
+                message: message));
 
-      log("message send successfully");
-      return true;
-      // } else {
-      //   return false;
-      // }
+        log("message send successfully");
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       log('there is an error sending message to another device:: $e');
       return false;

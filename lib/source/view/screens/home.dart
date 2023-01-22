@@ -1,3 +1,4 @@
+import 'package:b_le/source/controller/home_controller.dart';
 import 'package:b_le/source/view/screens/device_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

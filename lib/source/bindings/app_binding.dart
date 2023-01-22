@@ -7,5 +7,6 @@ class AppBindings extends Bindings {
   @override
   void dependencies() {
     Get.put(LocalX());
+    // Get.put(HomeController());
   }
 }
