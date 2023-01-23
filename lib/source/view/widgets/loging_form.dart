@@ -11,72 +11,81 @@ class LoginForm extends StatelessWidget {
     return Obx(
       () => SizedBox(
         width: Get.width / 1.5,
-        child: Column(
-          children: <Widget>[
-            authController.errorMessage.value.isNotEmpty
-                ? Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blue),
-                      borderRadius: BorderRadius.circular(14.0),
-                    ),
-                    child: Text(
-                      authController.errorMessage.value,
-                      style: const TextStyle(color: Colors.blue),
-                    ),
-                  )
-                : const Center(),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text("To Use Cloud storage, Login/register first"),
-            const SizedBox(
-              height: 10,
-            ),
-            TextFormField(
-              controller: authController.usernameController.value,
-              decoration: const InputDecoration(
-                label: Text("Enter Email"),
-                suffixIcon: Icon(
-                  Icons.email,
-                  color: Colors.blue,
+        child: authController.userExists.isTrue
+            ? const Center(
+                child: Text(
+                  "Logged In!",
+                  style: TextStyle(color: Colors.blue),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            TextFormField(
-              controller: authController.passwordController.value,
-              obscureText: authController.obscureText.value,
-              decoration: InputDecoration(
-                label: const Text("Enter Password"),
-                suffixIcon: IconButton(
-                  onPressed: authController.hidePassword,
-                  icon: const Icon(
-                    Icons.remove_red_eye,
-                    color: Colors.blue,
+              )
+            : Column(
+                children: <Widget>[
+                  authController.errorMessage.value.isNotEmpty
+                      ? Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blue),
+                            borderRadius: BorderRadius.circular(14.0),
+                          ),
+                          child: Text(
+                            authController.errorMessage.value,
+                            style: const TextStyle(color: Colors.blue),
+                          ),
+                        )
+                      : const Center(),
+                  const SizedBox(
+                    height: 10,
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
-              onPressed: authController.loginOrRegisterWithEmailAndPass,
-              child: authController.loginLoader.value
-                  ? const SizedBox(
-                      height: 15,
-                      width: 15,
-                      child: CircularProgressIndicator(),
-                    )
-                  : const Text(
-                      "Login / Register",
+                  const Text("To Use Cloud storage, Login/register first"),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextFormField(
+                    controller: authController.usernameController.value,
+                    decoration: const InputDecoration(
+                      label: Text("Enter Email"),
+                      suffixIcon: Icon(
+                        Icons.email,
+                        color: Colors.blue,
+                      ),
                     ),
-            ),
-          ],
-        ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextFormField(
+                    controller: authController.passwordController.value,
+                    obscureText: authController.obscureText.value,
+                    decoration: InputDecoration(
+                      label: const Text("Enter Password"),
+                      suffixIcon: IconButton(
+                        onPressed: authController.hidePassword,
+                        icon: const Icon(
+                          Icons.remove_red_eye,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: authController.loginOrRegisterWithEmailAndPass,
+                    child: authController.loginLoader.value
+                        ? const SizedBox(
+                            height: 15,
+                            width: 15,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Login / Register",
+                          ),
+                  ),
+                ],
+              ),
       ),
     );
   }

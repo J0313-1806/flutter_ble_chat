@@ -1,18 +1,26 @@
 import 'dart:developer';
-
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AuthController extends GetxController {
   /// Initializing firebase authentication
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   /// Initializing Firebase Firestore
-  // final FirebaseAuth _firestore = Fire;
+  // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  /// Initializing Firebase Storage
+  final _storage = FirebaseStorage.instance;
 
   /// Checks if user is signed in or not
   User? get currentUser => _firebaseAuth.currentUser;
+
+  /// Checks if user is logged or not
+  var userExists = false.obs;
 
   /// Listens if User has signed in or signed out
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -27,7 +35,7 @@ class AuthController extends GetxController {
   var errorMessage = "".obs;
 
   /// Obscuring password
-  var obscureText = false.obs;
+  var obscureText = true.obs;
 
   /// Login/register loader
   var loginLoader = false.obs;
@@ -48,6 +56,8 @@ class AuthController extends GetxController {
           errorMessage.value = "";
           Get.snackbar("Log in Successful", "Login completed",
               backgroundColor: Colors.blue);
+          userExists(true);
+          // currentUser.reauthenticateWithCredential(credential)
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -84,15 +94,102 @@ class AuthController extends GetxController {
         errorMessage("$e");
         log("Sign in with email and password function error: $e");
       }
+    } finally {
+      update;
     }
   }
 
-  /// Backing up seleted user chat to Firestore
-  void backingUpToCloud() {}
+  /// For Loggin out from Device
+  Future<void> signOut() async {
+    try {
+      await _firebaseAuth.signOut();
+      Get.snackbar("Signed Out", "You are no longer Signed In",
+          backgroundColor: Colors.grey);
+      userExists(false);
+    } catch (e) {
+      log("Sign out error: $e");
+    }
+  }
+
+  /// Backing up seleted user chat to Firbase Storage
+  // void backingUpToCloud(File file, String name) async {
+  //   var task = await uploadFile(file: file, fileName: name);
+
+  // }
+
+  /// For backing up the file on to Firebase Storage
+  Future<TaskSnapshot?> uploadFile(
+      {required File? file, required String? fileName}) async {
+    try {
+      if (currentUser != null) {
+        final ref = _storage.ref(currentUser!.uid).child(fileName!);
+        final task = ref.putFile(file!);
+        // log(task);
+        task.then((p0) {
+          if (p0.state == TaskState.success) {
+            log("Backup uploaded successfully!");
+            return p0;
+          } else {
+            log("Task State: $p0");
+          }
+        }).catchError((onError) {
+          log("Task Error: $onError");
+        });
+      } else {
+        Get.snackbar("No User Found!", "Please login or register",
+            backgroundColor: Colors.grey);
+        return null;
+      }
+    } catch (e) {
+      log("backing cloud: $e");
+    } finally {
+      // imageUploading(false);
+    }
+    return null;
+  }
+
+  /// fetching from cloud Storage of Firebase
+  void fetchingBackup() {}
+
+  /// Downloading file from Firebase Storage
+  Future<void> downloadFile({required String fileName}) async {
+    try {
+      if (currentUser != null) {
+        final reference =
+            _storage.ref().child("${currentUser!.uid}/$fileName"); //.hive
+
+        final appDocDir = await getApplicationDocumentsDirectory();
+        final filePath =
+            "${appDocDir.path}/$fileName.hive"; //! it will replace the file if another with same name exists
+        final file = File(filePath);
+
+        await reference.writeToFile(file).then((task) {
+          if (task.state == TaskState.success) {
+            Get.snackbar("Backup Downloaded",
+                "Please restart the app to get the backed up messages",
+                backgroundColor: Colors.blue);
+          } else {
+            log("Error fetching backup: $task");
+          }
+        });
+      } else {
+        Get.snackbar("No User Found!", "Please login or register",
+            backgroundColor: Colors.blue);
+      }
+    } catch (e) {
+      log("downloading backup error: $e");
+    }
+  }
 
   /// To hide the password or not
   void hidePassword() {
     obscureText.toggle();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    currentUser != null ? userExists(true) : userExists(false);
   }
 
   @override

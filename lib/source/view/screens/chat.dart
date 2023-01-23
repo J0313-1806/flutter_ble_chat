@@ -61,10 +61,20 @@ class _ChatState extends State<Chat> {
             IconButton(
               onPressed: () {
                 MessagesController messagesController = Get.find();
-                messagesController.backupToCloud();
+                messagesController.backupToCloud(widget.deviceUsername);
               },
               icon: const Icon(
-                Icons.cloud,
+                Icons.cloud_upload,
+                color: Colors.blue,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                MessagesController messagesController = Get.find();
+                messagesController.downloadFromCloud(widget.deviceUsername);
+              },
+              icon: const Icon(
+                Icons.cloud_download,
                 color: Colors.blue,
               ),
             ),
