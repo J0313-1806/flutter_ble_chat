@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/message.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';
+import 'package:path_provider/path_provider.dart';
 
 class MessagesController extends GetxController {
   // final HomeController _devicesController = Get.find();
@@ -26,6 +29,12 @@ class MessagesController extends GetxController {
 
   /// getting the index of message in list to store in local
   var messageIndex = -1.obs;
+
+  /// Loader to show when file is uploading to cloud
+  var uploadingFile = false.obs;
+
+  /// Loader to show when fetching file from the cloud
+  var downloadingFile = false.obs;
 
   void onSendMessage(
       {required String toId,
@@ -117,10 +126,38 @@ class MessagesController extends GetxController {
     log("chats ${messages.last}");
   }
 
-  void backupToCloud() {
-    AuthController authController = Get.find();
-    // var backupMessages = messageToJson(messages);
-    // log("backupMessages: $backupMessages");
-    authController.backingUpToCloud();
+  /// Getting Hive file for Cloud backup
+  void backupToCloud(String name) async {
+    try {
+      uploadingFile(true);
+      AuthController authController = Get.find();
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      String appDocPath = appDocDir.path;
+      "/data/com.example.b_le/app_flutter/m2012k11ai.hive";
+      File file = File(
+          "$appDocPath/$name.hive"); //  File file = File("$appDocPath/m2006c3li.hive");
+      await authController.uploadFile(file: file, fileName: name);
+      // if (task != null && task.state == TaskState.success) {
+      //   uploadingFile(false);
+      // } else {}
+    } catch (e) {
+      log("Error caught on backing to cloud: $e");
+    } finally {
+      uploadingFile(false);
+    }
+  }
+
+  /// Saving Hive File from Cloud
+  void downloadFromCloud(String name) async {
+    try {
+      downloadingFile(true);
+      AuthController authController = Get.find();
+
+      await authController.downloadFile(fileName: name);
+    } catch (e) {
+      log("Error caught on downloading backup from cloud: $e");
+    } finally {
+      downloadingFile(false);
+    }
   }
 }

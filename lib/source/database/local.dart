@@ -34,6 +34,11 @@ class LocalX extends GetxController {
   static List<dynamic> getChat(String deviceName) =>
       chatBox(deviceName).values.toList();
 
+  /// Fetching box for cloud backup
+  static Box<Message> getBoxForBackup(String name) {
+    return Hive.box(name);
+  }
+
   @override
   void onClose() {
     disposeHive();
