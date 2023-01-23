@@ -17,43 +17,6 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            TextButton(
-              onPressed: () async {
-                Directory appDocDir = await getApplicationDocumentsDirectory();
-                String appDocPath = appDocDir.path;
-                "/data/com.example.b_le/app_flutter/m2012k11ai.hive";
-                File file = File("$appDocPath/m2006c3li.hive");
-
-                await _authController.uploadFile(
-                    file: file, fileName: "m2006c3li");
-                // var read = await file.length();
-                log("hive: $appDocPath");
-              },
-              child: const Text(
-                "upload",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                Directory appDocDir = await getApplicationDocumentsDirectory();
-                String appDocPath = appDocDir.path;
-                "/data/com.example.b_le/app_flutter/m2012k11ai.hive";
-                File file = File("$appDocPath/m2006c3li.hive");
-
-                await _authController.downloadFile(fileName: "m2006c3li");
-                var read = await file.length();
-                log("hive: $read");
-              },
-              child: const Text(
-                "download",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
         actions: <Widget>[
           IconButton(
               onPressed: _authController.signOut,
