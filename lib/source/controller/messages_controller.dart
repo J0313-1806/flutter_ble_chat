@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/message.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,7 +27,7 @@ class MessagesController extends GetxController {
       connectedIdList.removeWhere((element) => element == id);
 
   /// getting the index of message in list to store in local
-  var messageIndex = -1.obs;
+  var messageIndex = 0.obs;
 
   /// Loader to show when file is uploading to cloud
   var uploadingFile = false.obs;
@@ -55,7 +54,7 @@ class MessagesController extends GetxController {
 
     savingChat(
         toUsername,
-        messageIndex,
+        messageIndex.value,
         Message(
           sent: true,
           toId: toId,
@@ -95,7 +94,7 @@ class MessagesController extends GetxController {
       );
       savingChat(
         fromInfo.endpointName,
-        messageIndex,
+        messageIndex.value,
         Message(
           toId: "",
           sent: false,
@@ -119,11 +118,17 @@ class MessagesController extends GetxController {
 
   /// Getting the messages from local storage
   void gettingChat(String deviceName) async {
-    List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
+    Future.delayed(const Duration(seconds: 0), () {
+      List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
 
-    messages.addAll(msg);
+      if (msg == null || msg.isEmpty) {
+        log("No chats found");
+      } else {
+        messages.addAll(msg);
+      }
 
-    log("chats ${messages.last}");
+      log("chats ${messages.last}");
+    });
   }
 
   /// Getting Hive file for Cloud backup

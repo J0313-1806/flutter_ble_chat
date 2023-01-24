@@ -1,12 +1,8 @@
-import 'dart:developer';
-import 'dart:io';
-
 import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/view/screens/device_page.dart';
 import 'package:b_le/source/view/widgets/loging_form.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});

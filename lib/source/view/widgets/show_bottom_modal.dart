@@ -1,5 +1,4 @@
 import 'package:b_le/source/controller/devices_controller.dart';
-import 'package:b_le/source/controller/messages_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';

@@ -9,7 +9,6 @@ import 'package:b_le/source/view/widgets/show_bottom_modal.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 

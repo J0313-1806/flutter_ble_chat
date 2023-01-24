@@ -123,18 +123,24 @@ class AuthController extends GetxController {
     try {
       if (currentUser != null) {
         final ref = _storage.ref(currentUser!.uid).child(fileName!);
-        final task = ref.putFile(file!);
-        // log(task);
-        task.then((p0) {
-          if (p0.state == TaskState.success) {
-            log("Backup uploaded successfully!");
-            return p0;
-          } else {
-            log("Task State: $p0");
-          }
-        }).catchError((onError) {
-          log("Task Error: $onError");
-        });
+        if (file != null) {
+          final task = ref.putFile(file);
+
+          task.then((p0) {
+            if (p0.state == TaskState.success) {
+              log("Backup uploaded successfully!");
+              return p0;
+            } else {
+              log("Task State: $p0");
+            }
+          }).catchError((onError) {
+            log("Task Error: $onError");
+          });
+        } else {
+          Get.snackbar("No File Found!", "Please try agiain",
+              backgroundColor: Colors.grey);
+          log("File not found");
+        }
       } else {
         Get.snackbar("No User Found!", "Please login or register",
             backgroundColor: Colors.grey);

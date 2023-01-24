@@ -61,7 +61,8 @@ class _ChatState extends State<Chat> {
             IconButton(
               onPressed: () {
                 MessagesController messagesController = Get.find();
-                messagesController.backupToCloud(widget.deviceUsername);
+                messagesController
+                    .backupToCloud(widget.deviceUsername.toLowerCase());
               },
               icon: const Icon(
                 Icons.cloud_upload,
@@ -71,7 +72,8 @@ class _ChatState extends State<Chat> {
             IconButton(
               onPressed: () {
                 MessagesController messagesController = Get.find();
-                messagesController.downloadFromCloud(widget.deviceUsername);
+                messagesController
+                    .downloadFromCloud(widget.deviceUsername.toLowerCase());
               },
               icon: const Icon(
                 Icons.cloud_download,
@@ -101,7 +103,7 @@ class _ChatState extends State<Chat> {
                           itemBuilder: (BuildContext context, int index) {
                             // controller.savingChat(
                             //     widget.deviceUsername, index, messages[index]);
-                            controller.messageIndex = index;
+                            controller.messageIndex(index);
                             return ChatBubble(
                                 message: messages[index],
                                 deviceUsername: widget.deviceUsername,
@@ -110,7 +112,7 @@ class _ChatState extends State<Chat> {
                         )
                       : const Center(
                           child: Text(
-                            "Connect to start chatting or see chat history",
+                            "Start chatting",
                             style: TextStyle(color: Colors.blue),
                           ),
                         );

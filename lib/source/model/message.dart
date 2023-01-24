@@ -51,7 +51,7 @@ class Message extends HiveObject {
     );
   }
 
-  @override
+  // @override
   Map<String, dynamic> toJson() {
     return {
       'sent': sent,
