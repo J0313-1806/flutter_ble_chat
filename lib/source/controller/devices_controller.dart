@@ -8,6 +8,7 @@ import 'package:b_le/source/model/device.dart';
 import 'package:b_le/source/view/widgets/show_bottom_modal.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';
@@ -230,9 +231,15 @@ class HomeController extends GetxController {
               return value;
             });
           }
+          Get.snackbar("Connected!", "Now you can chat with the device",
+              backgroundColor: Colors.grey);
         },
         onDisconnected: (endpointId) {
           connectingLoader.value = false;
+
+          Get.snackbar(
+              "Disconnected!", "You are no longer connected with $endpointId",
+              backgroundColor: Colors.grey);
 
           /// Remove the device from the device list
           connectedDevices.remove(endpointId);
@@ -275,10 +282,15 @@ class HomeController extends GetxController {
           log("connected: $connectedDevices");
           // browserFuncInitiated(false);
           log("$endpointId : $status");
+          Get.snackbar("Connected!", "Now you can chat with $endpointId",
+              backgroundColor: Colors.grey);
         },
         onDisconnected: (value) {
           connectingLoader.value = false;
           connectedDevices.remove(deviceId);
+          Get.snackbar(
+              "Disconnected!", "You are no longer connected with $value",
+              backgroundColor: Colors.grey);
           log("on disconnect: $value");
         },
       );
