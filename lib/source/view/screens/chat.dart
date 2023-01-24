@@ -49,6 +49,7 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    final MessagesController messagesController = Get.find();
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -58,28 +59,35 @@ class _ChatState extends State<Chat> {
             overflow: TextOverflow.ellipsis,
           ),
           actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                MessagesController messagesController = Get.find();
-                messagesController
-                    .backupToCloud(widget.deviceUsername.toLowerCase());
-              },
-              icon: const Icon(
-                Icons.cloud_upload,
-                color: Colors.blue,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                MessagesController messagesController = Get.find();
-                messagesController
-                    .downloadFromCloud(widget.deviceUsername.toLowerCase());
-              },
-              icon: const Icon(
-                Icons.cloud_download,
-                color: Colors.blue,
-              ),
-            ),
+            Obx(() => IconButton(
+                  onPressed: () async {
+                    MessagesController messagesController = Get.find();
+                    await messagesController
+                        .backupToCloud(widget.deviceUsername.toLowerCase());
+                  },
+                  icon: messagesController.uploadingFile.value
+                      ? const CircularProgressIndicator(
+                          backgroundColor: Colors.blue,
+                        )
+                      : const Icon(
+                          Icons.cloud_upload,
+                          color: Colors.blue,
+                        ),
+                )),
+            Obx(() => IconButton(
+                  onPressed: () {
+                    MessagesController messagesController = Get.find();
+                    messagesController
+                        .downloadFromCloud(widget.deviceUsername.toLowerCase());
+                  },
+                  icon: messagesController.downloadingFile.value
+                      ? const CircularProgressIndicator(
+                          backgroundColor: Colors.blue)
+                      : const Icon(
+                          Icons.cloud_download,
+                          color: Colors.blue,
+                        ),
+                )),
           ],
           centerTitle: true,
           elevation: 0,

@@ -15,35 +15,36 @@ class Home extends StatelessWidget {
       appBar: AppBar(
         actions: <Widget>[
           IconButton(
-              onPressed: _authController.signOut,
-              icon: const Icon(
-                Icons.logout,
-                color: Colors.white,
-              ))
-        ],
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ListView(
-            shrinkWrap: true,
-            children: [
-              const Align(alignment: Alignment.center, child: LoginForm()),
-              const SizedBox(
-                height: 20,
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Get.to(() => const DevicePage());
-                  },
-                  child: const Text("Search nearby devices"),
-                ),
-              ),
-            ],
+            onPressed: _authController.signOut,
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.blue,
+            ),
           ),
         ],
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Center(child: LoginForm()),
+            const SizedBox(
+              height: 20,
+            ),
+            Center(
+              // alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.to(() => const DevicePage());
+                },
+                child: const Text("Search nearby devices"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

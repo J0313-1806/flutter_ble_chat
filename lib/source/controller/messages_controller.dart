@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:b_le/source/controller/auth_controller.dart';
 import 'package:b_le/source/database/local.dart';
 import 'package:b_le/source/model/message.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 import 'package:path_provider/path_provider.dart';
@@ -118,21 +119,25 @@ class MessagesController extends GetxController {
 
   /// Getting the messages from local storage
   void gettingChat(String deviceName) async {
-    Future.delayed(const Duration(seconds: 0), () {
-      List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
+    try {
+      Future.delayed(const Duration(seconds: 0), () {
+        List<Message> msg = LocalX.getChat(deviceName) as List<Message>;
 
-      if (msg == null || msg.isEmpty) {
-        log("No chats found");
-      } else {
-        messages.addAll(msg);
-      }
+        if (msg == null || msg.isEmpty) {
+          log("No chats found");
+        } else {
+          messages.addAll(msg);
+        }
 
-      log("chats ${messages.last}");
-    });
+        log("chats ${messages.last}");
+      });
+    } catch (e) {
+      log("Couldn't fetch chats from storage: $e:");
+    }
   }
 
   /// Getting Hive file for Cloud backup
-  void backupToCloud(String name) async {
+  Future<void> backupToCloud(String name) async {
     try {
       uploadingFile(true);
       AuthController authController = Get.find();
@@ -141,14 +146,13 @@ class MessagesController extends GetxController {
       "/data/com.example.b_le/app_flutter/m2012k11ai.hive";
       File file = File(
           "$appDocPath/$name.hive"); //  File file = File("$appDocPath/m2006c3li.hive");
-      await authController.uploadFile(file: file, fileName: name);
-      // if (task != null && task.state == TaskState.success) {
-      //   uploadingFile(false);
-      // } else {}
+      var task = await authController.uploadFile(file: file, fileName: name);
+      if (task != null && task.state == TaskState.success) {
+        uploadingFile(false);
+      } else {}
     } catch (e) {
-      log("Error caught on backing to cloud: $e");
-    } finally {
       uploadingFile(false);
+      log("Error caught on backing to cloud: $e");
     }
   }
 

@@ -21,7 +21,7 @@ class LocalX extends GetxController {
     await Hive.openBox<Message>(deviceName);
   }
 
-  /// gets the hhive box
+  /// gets the hive box
   static Box<dynamic> chatBox(String deviceName) =>
       Hive.box<Message>(deviceName);
 

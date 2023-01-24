@@ -173,6 +173,7 @@ class HomeController extends GetxController {
         getLocationPermission();
       }
     } catch (e) {
+      Get.snackbar("Scanning error", "$e", backgroundColor: Colors.blue);
       scanningDevices.value = false;
       log('there is an error searching for nearby devices:: $e');
     }
@@ -248,6 +249,7 @@ class HomeController extends GetxController {
       log("devices: \n\t$devices");
     } catch (e) {
       connectingLoader.value = false;
+      Get.snackbar("Advertising error", "$e", backgroundColor: Colors.blue);
       // advertiseFuncInitiated(false);
       log('there is an error advertising the device:: $e');
     }
@@ -295,6 +297,7 @@ class HomeController extends GetxController {
       );
     } catch (e) {
       connectingLoader.value = false;
+      Get.snackbar("Requesting error", "$e", backgroundColor: Colors.blue);
       log('there is an error requesting to connect to a device:: $e');
       if (e.toString() ==
           "PlatformException(Failure, 8003: STATUS_ALREADY_CONNECTED_TO_ENDPOINT, null, null)") {
@@ -362,11 +365,18 @@ class HomeController extends GetxController {
         Get.defaultDialog(
             title: "Couldn't accept",
             middleText: "Try connecting again",
-            onConfirm: () => Get.back());
+            onConfirm: () {
+              Get.back();
+              Get.snackbar("Connecting Device error", "$onError",
+                  backgroundColor: Colors.blue);
+            });
+
         log("accept connection: $onError");
         return;
       });
     } catch (e) {
+      Get.snackbar("Connecting Device error", "$e",
+          backgroundColor: Colors.blue);
       log('there is an error accepting connection from another device:: $e');
     }
   }

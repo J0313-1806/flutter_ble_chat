@@ -111,12 +111,6 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Backing up seleted user chat to Firbase Storage
-  // void backingUpToCloud(File file, String name) async {
-  //   var task = await uploadFile(file: file, fileName: name);
-
-  // }
-
   /// For backing up the file on to Firebase Storage
   Future<TaskSnapshot?> uploadFile(
       {required File? file, required String? fileName}) async {
@@ -124,18 +118,18 @@ class AuthController extends GetxController {
       if (currentUser != null) {
         final ref = _storage.ref(currentUser!.uid).child(fileName!);
         if (file != null) {
-          final task = ref.putFile(file);
+          final task = await ref.putFile(file);
 
-          task.then((p0) {
-            if (p0.state == TaskState.success) {
-              log("Backup uploaded successfully!");
-              return p0;
-            } else {
-              log("Task State: $p0");
-            }
-          }).catchError((onError) {
-            log("Task Error: $onError");
-          });
+          // task.then((p0) {
+          if (task.state == TaskState.success) {
+            log("Backup uploaded successfully!");
+            return task;
+          } else {
+            log("Task State: $task");
+          }
+          // }).catchError((onError) {
+          // log("Task Error: $onError");
+          // });
         } else {
           Get.snackbar("No File Found!", "Please try agiain",
               backgroundColor: Colors.grey);
@@ -147,15 +141,14 @@ class AuthController extends GetxController {
         return null;
       }
     } catch (e) {
+      Get.snackbar("Uploading backup error", "$e",
+          backgroundColor: Colors.blue);
       log("backing cloud: $e");
     } finally {
       // imageUploading(false);
     }
     return null;
   }
-
-  /// fetching from cloud Storage of Firebase
-  void fetchingBackup() {}
 
   /// Downloading file from Firebase Storage
   Future<void> downloadFile({required String fileName}) async {
@@ -183,7 +176,9 @@ class AuthController extends GetxController {
             backgroundColor: Colors.blue);
       }
     } catch (e) {
-      log("downloading backup error: $e");
+      Get.snackbar("Downloading backup error", "$e",
+          backgroundColor: Colors.blue);
+      log("Downloading backup error: $e");
     }
   }
 
